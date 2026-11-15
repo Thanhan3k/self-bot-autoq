@@ -3,69 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đấu Trường Sưu Tầm & Đua Rank</title>
-    <link rel="stylesheet" href="./style.css?v=5">
+    <title>Idle Mining Tycoon & Đua Rank</title>
+    <link rel="stylesheet" href="./style.css?v=1">
 </head>
 <body>
 
 <div class="app-container">
-    <!-- CỘT TRÁI: NHÂN VẬT & GACHA -->
+    <!-- CỘT TRÁI: QUẢN LÝ MỎ & NÂNG CẤP -->
     <div class="panel left-panel">
-        <h2>🛡️ Đấu Trường Sưu Tầm Gacha</h2>
+        <h2>⛏️ Mỏ Khoáng Tự Động (Idle)</h2>
         
         <div class="profile-box">
             <div id="loginArea">
-                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Nhập Discord Token để đăng nhập:</p>
-                <input type="password" id="tokenInput" placeholder="Dán token tài khoản vào đây...">
-                <button class="btn-primary" onclick="loginByToken()">Đăng Nhập Bằng Token</button>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Nhập Discord Token để lưu ID & đua rank:</p>
+                <input type="password" id="tokenInput" placeholder="Dán token tài khoản...">
+                <button class="btn-primary" onclick="loginByToken()">Đăng Nhập Nhanh</button>
             </div>
 
             <div id="userProfileArea" style="display: none;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <div id="userAvatarContainer" style="width: 45px; height: 45px; border-radius: 50%; background: #5865f2; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold;">?</div>
                     <div style="flex: 1; overflow: hidden;">
                         <strong id="displayName" style="color: #fff; display: block; font-size: 15px;">User</strong>
-                        <span style="font-size: 12px; color: var(--text-secondary);">Rank: <strong id="displayRank" style="color: var(--gold);">Tập Sự</strong></span>
+                        <span style="font-size: 12px; color: var(--text-secondary);">Cấp Mỏ: <strong id="displayLevel" style="color: var(--gold);">Cấp 1</strong></span>
                     </div>
-                    <button onclick="logoutDiscord()" class="btn-danger" style="width: auto; padding: 6px 10px; font-size: 11px; margin-top:0;">Đăng Xuất</button>
+                    <button onclick="logoutDiscord()" class="btn-danger" style="width: auto; padding: 6px 10px; font-size: 11px; margin-top:0;">Thoát</button>
                 </div>
             </div>
-
-            <!-- Cấu hình GitHub Token để tự ghi data.json -->
-            <details style="font-size: 11px; color: var(--text-secondary); cursor: pointer; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
-                <summary>⚙️ Cấu hình GitHub (Tự động ghi data.json)</summary>
-                <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 5px;">
-                    <input type="text" id="ghOwner" placeholder="Tên GitHub (VD: Thanhan3k)">
-                    <input type="text" id="ghRepo" placeholder="Tên Repository">
-                    <input type="password" id="ghToken" placeholder="GitHub Personal Access Token">
-                    <button class="btn-success" onclick="saveGitHubConfig()" style="padding: 5px; font-size: 11px; margin-top:0;">Lưu Cấu Hình</button>
-                </div>
-            </details>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <div style="background: var(--card-inner); padding: 12px; border-radius: 10px; text-align: center;">
-                🔑 Chìa Khóa Mở Rương
-                <span id="keyCount" style="display: block; font-size: 20px; font-weight: bold; color: var(--gold); margin-top: 4px;">0</span>
+        <div class="resource-grid">
+            <div class="resource-box">
+                💰 Vàng Tích Lũy
+                <span id="goldCount">0</span>
             </div>
-            <div style="background: var(--card-inner); padding: 12px; border-radius: 10px; text-align: center;">
-                ⚔️ Tổng Điểm Sức Mạnh
-                <span id="powerScore" style="display: block; font-size: 20px; font-weight: bold; color: var(--primary); margin-top: 4px;">0</span>
+            <div class="resource-box">
+                ⚡ Tốc Độ Đào
+                <span id="rateCount">1/giây</span>
             </div>
         </div>
 
-        <button class="btn-success" onclick="dailyCheckin()">📅 Điểm Danh Nhận +2 Chìa Khóa</button>
-        <button class="btn-gold" onclick="openChest()">🎁 Mở Rương Kho Báu (-1 Chìa Khóa)</button>
-
-        <h3 style="margin-top: 20px;">🎒 Túi Đồ Sưu Tầm</h3>
-        <div class="inventory-grid" id="inventoryGrid">
-            <div style="grid-column: span 4; text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">Túi đồ trống. Hãy đăng nhập và mở rương!</div>
-        </div>
+        <button class="btn-success" onclick="collectGold()">📥 Thu Hoạch Vàng AFK</button>
+        <button class="btn-gold" onclick="upgradeMine()">🔨 Nâng Cấp Mỏ (Giá: <span id="upgradeCost">50</span> Vàng)</button>
     </div>
 
-    <!-- CỘT PHẢI: BẢNG XẾP HẠNG -->
+    <!-- CỘT PHẢI: BẢNG XẾP HẠNG SERVER -->
     <div class="panel right-panel">
-        <h2>🏆 Bảng Xếp Hạng Sưu Tầm</h2>
+        <h2>🏆 Bảng Xếp Hạng Khai Thác</h2>
         <p id="syncStatus" style="font-size: 12px; color: var(--text-secondary); margin-top: -8px;">Đang tải dữ liệu...</p>
         
         <ul class="leaderboard-list" id="leaderboardList">
@@ -75,35 +59,8 @@
 </div>
 
 <script>
-    const ITEM_POOL = [
-        { name: "Kiếm Gỗ", rarity: "common", power: 10 },
-        { name: "Giáp Vải", rarity: "common", power: 10 },
-        { name: "Khiên Đồng", rarity: "rare", power: 30 },
-        { name: "Cung Tinh Linh", rarity: "rare", power: 45 },
-        { name: "Kiếm Ánh Sáng", rarity: "epic", power: 100 },
-        { name: "Áo Giáp Rồng", rarity: "epic", power: 130 },
-        { name: "Đao Hủy Diệt", rarity: "legendary", power: 300 },
-        { name: "Vương Miện Tối Thượng", rarity: "legendary", power: 500 }
-    ];
-
     let serverData = { rankings: [] };
-    let currentUser = JSON.parse(localStorage.getItem('discord_token_user')) || null;
-
-    let ghConfig = JSON.parse(localStorage.getItem('gh_config')) || { owner: "", repo: "", token: "" };
-    document.getElementById('ghOwner').value = ghConfig.owner;
-    document.getElementById('ghRepo').value = ghConfig.repo;
-    document.getElementById('ghToken').value = ghConfig.token;
-
-    function saveGitHubConfig() {
-        ghConfig = {
-            owner: document.getElementById('ghOwner').value.trim(),
-            repo: document.getElementById('ghRepo').value.trim(),
-            token: document.getElementById('ghToken').value.trim()
-        };
-        localStorage.setItem('gh_config', JSON.stringify(ghConfig));
-        alert('✅ Đã lưu cấu hình GitHub!');
-        loadData();
-    }
+    let currentUser = JSON.parse(localStorage.getItem('discord_idle_user')) || null;
 
     async function loginByToken() {
         const token = document.getElementById('tokenInput').value.trim();
@@ -121,9 +78,8 @@
                 username: user.username,
                 avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : null
             };
-            localStorage.setItem('discord_token_user', JSON.stringify(currentUser));
+            localStorage.setItem('discord_idle_user', JSON.stringify(currentUser));
             initPlayer();
-            await saveDataToGitHub();
             renderUI();
         } catch(e) {
             alert('Lỗi kết nối Discord API!');
@@ -131,17 +87,8 @@
     }
 
     function logoutDiscord() {
-        localStorage.removeItem('discord_token_user');
+        localStorage.removeItem('discord_idle_user');
         location.reload();
-    }
-
-    function calculateRank(power) {
-        if (power >= 1000) return "Thách Đấu 👑";
-        if (power >= 500) return "Bạch Kim 💎";
-        if (power >= 250) return "Vàng 🥇";
-        if (power >= 100) return "Bạc 🥈";
-        if (power > 0) return "Đồng 🥉";
-        return "Tập Sự";
     }
 
     async function loadData() {
@@ -158,55 +105,15 @@
         } catch(e) {
             statusEl.innerText = "⚪ Chế độ ngoại tuyến";
         }
-        initPlayer();
-        renderUI();
-    }
 
-    async function saveDataToGitHub() {
-        const statusEl = document.getElementById('syncStatus');
-        if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) {
-            statusEl.innerText = "🟡 Đã lưu cục bộ (Chưa cấu hình GitHub Token)";
-            renderUI();
-            return;
+        const localSaved = localStorage.getItem('idle_rankings');
+        if (localSaved) {
+            serverData.rankings = JSON.parse(localSaved);
         }
-
-        statusEl.innerText = "⏳ Đang ghi vào data.json...";
-        const apiUrl = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/data.json`;
-
-        try {
-            let sha = "";
-            const getRes = await fetch(apiUrl, {
-                headers: { 'Authorization': `token ${ghConfig.token}` }
-            });
-            if (getRes.ok) {
-                const fileInfo = await getRes.json();
-                sha = fileInfo.sha;
-            }
-
-            // Chỉ lưu tối giản: id, keys, items, power, rank, last_checkin (hoàn toàn bảo mật thông tin cá nhân)
-            const jsonString = JSON.stringify(serverData, null, 2);
-            const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
-
-            const putRes = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${ghConfig.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: `Update data.json - ${currentUser.discord_id}`,
-                    content: base64Content,
-                    sha: sha || undefined
-                })
-            });
-
-            if (putRes.ok) {
-                statusEl.innerText = "✅ Đã cập nhật data.json lên GitHub!";
-            } else {
-                statusEl.innerText = "❌ Lỗi ghi GitHub API";
-            }
-        } catch (error) {
-            statusEl.innerText = "❌ Lỗi mạng GitHub";
+        
+        if (currentUser) {
+            initPlayer();
+            calcOfflineProgress();
         }
         renderUI();
     }
@@ -217,56 +124,68 @@
         if (!p) {
             p = { 
                 discord_id: currentUser.discord_id, 
-                keys: 3, 
-                items: [], 
-                power: 0, 
-                rank: "Tập Sự", 
-                last_checkin: "" 
+                gold: 0, 
+                mine_level: 1, 
+                last_time: Date.now() 
             };
             serverData.rankings.push(p);
         }
+        saveLocal();
     }
 
-    async function dailyCheckin() {
-        if (!currentUser) { alert('⚠️ Vui lòng đăng nhập trước!'); return; }
-        const today = new Date().toISOString().split('T')[0];
-        let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
-        
-        if (p.last_checkin === today) {
-            alert('📅 Hôm nay bạn đã điểm danh rồi!');
-            return;
-        }
-        p.keys += 2;
-        p.last_checkin = today;
-        await saveDataToGitHub();
-        alert('🎉 Điểm danh thành công! Nhận +2 Chìa Khóa.');
+    function saveLocal() {
+        localStorage.setItem('idle_rankings', JSON.stringify(serverData.rankings));
     }
 
-    async function openChest() {
-        if (!currentUser) { alert('⚠️ Vui lòng đăng nhập trước!'); return; }
+    // Tính toán tài nguyên tự động sinh ra kể cả khi tắt web (AFK)
+    function calcOfflineProgress() {
         let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
-        
-        if (p.keys <= 0) {
-            alert('❌ Bạn đã hết chìa khóa!');
+        if (!p) return;
+
+        const now = Date.now();
+        const secondsPassed = Math.floor((now - p.last_time) / 1000);
+        if (secondsPassed > 0) {
+            const earned = secondsPassed * p.mine_level; // Cấp mỏ càng cao đào càng nhanh
+            p.gold += earned;
+            p.last_time = now;
+            saveLocal();
+        }
+    }
+
+    // Vòng lặp chạy ngầm cộng vàng liên tục mỗi giây khi đang mở web
+    setInterval(() => {
+        if (!currentUser) return;
+        let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
+        if (p) {
+            p.gold += p.mine_level;
+            p.last_time = Date.now();
+            saveLocal();
+            document.getElementById('goldCount').innerText = p.gold.toLocaleString();
+        }
+    }, 1000);
+
+    function collectGold() {
+        if (!currentUser) { alert('Vui lòng đăng nhập trước!'); return; }
+        calcOfflineProgress();
+        renderUI();
+        alert('📥 Đã thu hoạch toàn bộ vàng khai thác!');
+    }
+
+    function upgradeMine() {
+        if (!currentUser) { alert('Vui lòng đăng nhập trước!'); return; }
+        let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
+        const cost = p.mine_level * 50;
+
+        if (p.gold < cost) {
+            alert(`❌ Không đủ vàng! Bạn cần ${cost} vàng để nâng cấp.`);
             return;
         }
 
-        p.keys -= 1;
-        const rand = Math.random() * 100;
-        let chosenRarity = "common";
-        if (rand > 97) chosenRarity = "legendary";
-        else if (rand > 85) chosenRarity = "epic";
-        else if (rand > 60) chosenRarity = "rare";
-
-        const pool = ITEM_POOL.filter(i => i.rarity === chosenRarity);
-        const item = pool[Math.floor(Math.random() * pool.length)];
-
-        p.items.push(item);
-        p.power = p.items.reduce((sum, i) => sum + i.power, 0);
-        p.rank = calculateRank(p.power);
-
-        await saveDataToGitHub();
-        alert(`🎁 Nhận được: [${item.name.toUpperCase()}] (${item.rarity.toUpperCase()}) +${item.power} lực!`);
+        p.gold -= cost;
+        p.mine_level += 1;
+        saveLocal();
+        renderUI();
+        alert(`🎉 Nâng cấp mỏ thành công lên Cấp ${p.mine_level}!`);
     }
 
     function renderUI() {
@@ -284,22 +203,10 @@
 
             let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
             if (p) {
-                document.getElementById('keyCount').innerText = p.keys;
-                document.getElementById('powerScore').innerText = p.power;
-                document.getElementById('displayRank').innerText = p.rank;
-
-                const grid = document.getElementById('inventoryGrid');
-                grid.innerHTML = '';
-                if (p.items.length === 0) {
-                    grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">Túi đồ trống.</div>`;
-                } else {
-                    p.items.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = `item-slot rarity-${item.rarity}`;
-                        div.innerHTML = `<strong>${item.name}</strong><span style="font-size:9px; margin-top:2px;">+${item.power} lực</span>`;
-                        grid.appendChild(div);
-                    });
-                }
+                document.getElementById('goldCount').innerText = p.gold.toLocaleString();
+                document.getElementById('rateCount').innerText = `${p.mine_level} vàng/s`;
+                document.getElementById('displayLevel').innerText = `Cấp ${p.mine_level}`;
+                document.getElementById('upgradeCost').innerText = p.mine_level * 50;
             }
         } else {
             document.getElementById('loginArea').style.display = 'block';
@@ -308,7 +215,7 @@
 
         const list = document.getElementById('leaderboardList');
         list.innerHTML = '';
-        const sorted = [...serverData.rankings].sort((a,b) => b.power - a.power);
+        const sorted = [...serverData.rankings].sort((a,b) => b.mine_level - a.mine_level || b.gold - a.gold);
 
         if (sorted.length === 0) {
             list.innerHTML = `<li style="text-align: center; color: var(--text-secondary); padding: 30px 10px; font-size: 13px;">Chưa có dữ liệu xếp hạng.</li>`;
@@ -321,9 +228,8 @@
             if (index === 1) medal = '🥈';
             if (index === 2) medal = '🥉';
 
-            // Hiển thị tên hiển thị / avatar dựa trên user đang active, còn bảng xếp hạng chung chỉ lưu ID
             const isMe = currentUser && user.discord_id === currentUser.discord_id;
-            const displayName = isMe ? currentUser.username : `Chiến Thần #${user.discord_id.slice(-4)}`;
+            const displayName = isMe ? currentUser.username : `Thợ Mỏ #${user.discord_id.slice(-4)}`;
             const displayAvatar = isMe ? currentUser.avatar : null;
 
             const li = document.createElement('li');
@@ -331,14 +237,14 @@
             li.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; background: #5865f2; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #fff;">
-                        ${displayAvatar ? `<img src="${displayAvatar}" style="width:100%;height:100%;object-fit:cover;">` : '🎮'}
+                        ${displayAvatar ? `<img src="${displayAvatar}" style="width:100%;height:100%;object-fit:cover;">` : '⛏️'}
                     </div>
                     <div>
                         <strong class="rank-badge">${medal} ${displayName}</strong>
-                        <div style="font-size: 11px; color: var(--text-secondary);">Rank: ${user.rank} | Đồ: ${user.items.length} món</div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">Cấp Mỏ: Cấp ${user.mine_level}</div>
                     </div>
                 </div>
-                <div style="font-weight: bold; color: var(--primary);">${user.power} điểm</div>
+                <div style="font-weight: bold; color: var(--gold);">${user.gold.toLocaleString()} vàng</div>
             `;
             list.appendChild(li);
         });
