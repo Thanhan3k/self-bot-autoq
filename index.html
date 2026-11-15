@@ -4,59 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto Send Message Discord</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #1e1f22;
-            color: #dbdee1;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            background-color: #2b2d31;
-            padding: 20px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        h2 { text-align: center; color: #fff; margin-top: 0; }
-        label { display: block; margin-top: 12px; font-size: 14px; font-weight: bold; }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 4px;
-            border: 1px solid #1e1f22;
-            background-color: #383a40;
-            color: #fff;
-            box-sizing: border-box;
-        }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            color: white;
-        }
-        #startBtn { background-color: #5865f2; }
-        #startBtn:disabled { background-color: #4752c4; opacity: 0.6; }
-        #stopBtn { background-color: #da373c; }
-        #log {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #1e1f22;
-            border-radius: 4px;
-            height: 150px;
-            overflow-y: auto;
-            font-size: 13px;
-            font-family: monospace;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -72,8 +20,24 @@
     <label>Nội dung tin nhắn:</label>
     <textarea id="message" rows="3" placeholder="Nhập nội dung muốn gửi..."></textarea>
 
-    <label>Thời gian nghỉ (giây):</label>
-    <input type="number" id="delay" value="90" min="5">
+    <label>Chế độ thời gian nghỉ (giây):</label>
+    <div class="time-mode">
+        <label class="radio-label">
+            <input type="radio" name="delayMode" value="fixed" checked onchange="toggleDelayMode()"> Cố định
+        </label>
+        <input type="number" id="fixedDelay" value="90" min="1" placeholder="Số giây cố định">
+    </div>
+
+    <div class="time-mode">
+        <label class="radio-label">
+            <input type="radio" name="delayMode" value="random" onchange="toggleDelayMode()"> Ngẫu nhiên (Từ - Đến)
+        </label>
+        <div class="range-inputs">
+            <input type="number" id="minDelay" value="60" min="1" placeholder="Từ (giây)" disabled>
+            <span>-</span>
+            <input type="number" id="maxDelay" value="120" min="1" placeholder="Đến (giây)" disabled>
+        </div>
+    </div>
 
     <div class="btn-group">
         <button id="startBtn" onclick="startAuto()">Bắt đầu chạy</button>
@@ -85,6 +49,24 @@
 
 <script>
     let timer = null;
+    let isRunning = false;
+
+    function toggleDelayMode() {
+        const mode = document.querySelector('input[name="delayMode"]:checked').value;
+        const fixedInput = document.getElementById('fixedDelay');
+        const minInput = document.getElementById('minDelay');
+        const maxInput = document.getElementById('maxDelay');
+
+        if (mode === 'fixed') {
+            fixedInput.disabled = false;
+            minInput.disabled = true;
+            maxInput.disabled = true;
+        } else {
+            fixedInput.disabled = true;
+            minInput.disabled = false;
+            maxInput.disabled = false;
+        }
+    }
 
     function addLog(text) {
         const logDiv = document.getElementById('log');
@@ -106,43 +88,82 @@
 
             if (response.ok) {
                 addLog('✅ Gửi tin nhắn thành công!');
+                return true;
             } else {
                 const err = await response.json();
                 addLog(`❌ Lỗi (${response.status}): ${err.message || 'Kiểm tra lại Token/ID'}`);
                 stopAuto();
+                return false;
             }
         } catch (error) {
             addLog(`⚠️ Lỗi mạng hoặc bị chặn CORS: ${error.message}`);
+            return true;
         }
+    }
+
+    function getNextDelay() {
+        const mode = document.querySelector('input[name="delayMode"]:checked').value;
+        if (mode === 'fixed') {
+            return parseInt(document.getElementById('fixedDelay').value);
+        } else {
+            const min = parseInt(document.getElementById('minDelay').value);
+            const max = parseInt(document.getElementById('maxDelay').value);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+    }
+
+    async function runLoop(token, channelId, message) {
+        if (!isRunning) return;
+
+        const success = await sendMessage(token, channelId, message);
+        if (!success || !isRunning) return;
+
+        const nextDelaySec = getNextDelay();
+        addLog(`⏳ Chờ ${nextDelaySec} giây cho tin tiếp theo...`);
+
+        timer = setTimeout(() => {
+            runLoop(token, channelId, message);
+        }, nextDelaySec * 1000);
     }
 
     function startAuto() {
         const token = document.getElementById('token').value.trim();
         const channelId = document.getElementById('channelId').value.trim();
         const message = document.getElementById('message').value.trim();
-        const delaySec = parseInt(document.getElementById('delay').value);
+        const mode = document.querySelector('input[name="delayMode"]:checked').value;
 
-        if (!token || !channelId || !message || isNaN(delaySec) || delaySec < 1) {
-            alert('Vui lòng điền đầy đủ thông tin hợp lệ!');
+        if (!token || !channelId || !message) {
+            alert('Vui lòng điền đầy đủ Token, ID kênh và Nội dung!');
             return;
         }
 
+        if (mode === 'fixed') {
+            const fixedSec = parseInt(document.getElementById('fixedDelay').value);
+            if (isNaN(fixedSec) || fixedSec < 1) {
+                alert('Thời gian cố định phải lớn hơn 0 giây!');
+                return;
+            }
+        } else {
+            const minSec = parseInt(document.getElementById('minDelay').value);
+            const maxSec = parseInt(document.getElementById('maxDelay').value);
+            if (isNaN(minSec) || isNaN(maxSec) || minSec < 1 || maxSec < minSec) {
+                alert('Khoảng thời gian không hợp lệ (Số "Đến" phải lớn hơn hoặc bằng số "Từ")!');
+                return;
+            }
+        }
+
+        isRunning = true;
         document.getElementById('startBtn').disabled = true;
         document.getElementById('stopBtn').disabled = false;
-        addLog(`🚀 Bắt đầu chạy (chu kỳ ${delaySec} giây)...`);
+        addLog('🚀 Bắt đầu chạy...');
 
-        // Gửi tin đầu tiên ngay lập tức
-        sendMessage(token, channelId, message);
-
-        // Lặp lại theo chu kỳ
-        timer = setInterval(() => {
-            sendMessage(token, channelId, message);
-        }, delaySec * 1000);
+        runLoop(token, channelId, message);
     }
 
     function stopAuto() {
+        isRunning = false;
         if (timer) {
-            clearInterval(timer);
+            clearTimeout(timer);
             timer = null;
         }
         document.getElementById('startBtn').disabled = false;
