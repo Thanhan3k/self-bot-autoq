@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đấu Trường Sưu Tầm & Đua Rank</title>
-    <link rel="stylesheet" href="./style.css?v=3">
+    <link rel="stylesheet" href="./style.css?v=4">
 </head>
 <body>
 
@@ -15,10 +15,9 @@
         
         <div class="profile-box">
             <div id="loginArea">
-                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;">Đăng nhập Discord để lưu trữ ID và đua rank:</p>
-                <a id="discordLoginBtn" href="#" class="btn-discord">
-                    🎮 Đăng nhập bằng Discord
-                </a>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Nhập Discord Token để đăng nhập nhanh:</p>
+                <input type="password" id="tokenInput" placeholder="Dán token tài khoản vào đây...">
+                <button class="btn-primary" onclick="loginByToken()">Đăng Nhập Bằng Token</button>
             </div>
 
             <div id="userProfileArea" style="display: none;">
@@ -65,14 +64,6 @@
 </div>
 
 <script>
-    // ⚠️ THAY CLIENT ID THẬT CỦA BẠN VÀO ĐÂY
-    const DISCORD_CLIENT_ID = "YOUR_CLIENT_ID"; 
-    
-    // Tự động làm sạch URL redirect để tránh lỗi cấu hình OAuth
-    const cleanOrigin = window.location.origin + window.location.pathname.replace(/\/index\.html$/, '');
-    document.getElementById('discordLoginBtn').href = 
-        `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(cleanOrigin + '/')}&response_type=token&scope=identify`;
-
     const ITEM_POOL = [
         { name: "Kiếm Gỗ", rarity: "common", power: 10 },
         { name: "Giáp Vải", rarity: "common", power: 10 },
@@ -85,32 +76,34 @@
     ];
 
     let serverData = { rankings: [] };
-    let currentUser = JSON.parse(localStorage.getItem('discord_user')) || null;
+    let currentUser = JSON.parse(localStorage.getItem('discord_token_user')) || null;
 
-    // Xử lý token trả về từ Discord OAuth2
-    const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const accessToken = fragment.get('access_token');
+    async function loginByToken() {
+        const token = document.getElementById('tokenInput').value.trim();
+        if (!token) { alert('Vui lòng nhập Token!'); return; }
 
-    if (accessToken) {
-        fetch('https://discord.com/api/users/@me', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        })
-        .then(res => res.json())
-        .then(user => {
+        try {
+            const res = await fetch('https://discord.com/api/v9/users/@me', {
+                headers: { 'Authorization': token }
+            });
+            if (!res.ok) { alert('Token không hợp lệ hoặc đã hết hạn!'); return; }
+            
+            const user = await res.json();
             currentUser = {
                 discord_id: user.id,
                 username: user.username,
                 avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : null
             };
-            localStorage.setItem('discord_user', JSON.stringify(currentUser));
-            window.history.replaceState({}, document.title, window.location.pathname);
-            window.location.reload();
-        })
-        .catch(err => console.error('Lỗi Discord API:', err));
+            localStorage.setItem('discord_token_user', JSON.stringify(currentUser));
+            initPlayer();
+            renderUI();
+        } catch(e) {
+            alert('Lỗi kết nối Discord API!');
+        }
     }
 
     function logoutDiscord() {
-        localStorage.removeItem('discord_user');
+        localStorage.removeItem('discord_token_user');
         location.reload();
     }
 
@@ -123,7 +116,6 @@
         return "Tập Sự";
     }
 
-    // Đọc data.json từ GitHub Pages
     async function loadData() {
         const statusEl = document.getElementById('syncStatus');
         try {
@@ -133,52 +125,49 @@
                 if (!serverData.rankings) serverData.rankings = [];
                 statusEl.innerText = "🟢 Đã đồng bộ từ data.json";
             } else {
-                statusEl.innerText = "⚪ Chưa có file data.json (Đang dùng dữ liệu tạm)";
+                statusEl.innerText = "⚪ Chế độ cục bộ";
             }
         } catch(e) {
             statusEl.innerText = "⚪ Chế độ ngoại tuyến";
         }
-        
-        if (currentUser) {
-            let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
-            if (!p) {
-                p = { 
-                    discord_id: currentUser.discord_id, 
-                    name: currentUser.username, 
-                    avatar: currentUser.avatar, 
-                    keys: 3, 
-                    items: [], 
-                    power: 0, 
-                    rank: "Tập Sự", 
-                    last_checkin: "" 
-                };
-                serverData.rankings.push(p);
-            } else {
-                p.name = currentUser.username;
-                p.avatar = currentUser.avatar;
-            }
+
+        const localSaved = localStorage.getItem('local_rankings');
+        if (localSaved) {
+            serverData.rankings = JSON.parse(localSaved);
         }
+        initPlayer();
         renderUI();
     }
 
+    function initPlayer() {
+        if (!currentUser) return;
+        let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
+        if (!p) {
+            p = { 
+                discord_id: currentUser.discord_id, 
+                keys: 3, 
+                items: [], 
+                power: 0, 
+                rank: "Tập Sự", 
+                last_checkin: "" 
+            };
+            serverData.rankings.push(p);
+        }
+        saveLocal();
+    }
+
     function saveLocal() {
-        // Lưu tự động vào localStorage để chạy mượt mà ngay cả khi không có backend server ghi file
+        // Chỉ lưu id, items, power, rank, keys, last_checkin (không lưu username hay thông tin cá nhân)
         localStorage.setItem('local_rankings', JSON.stringify(serverData.rankings));
     }
 
-    // Tải dữ liệu kết hợp localStorage nếu có
-    const localSaved = localStorage.getItem('local_rankings');
-    if (localSaved) {
-        serverData.rankings = JSON.parse(localSaved);
-    }
-
-    async function dailyCheckin() {
-        if (!currentUser) { alert('⚠️ Vui lòng đăng nhập Discord trước!'); return; }
+    function dailyCheckin() {
+        if (!currentUser) { alert('⚠️ Vui lòng đăng nhập trước!'); return; }
         const today = new Date().toISOString().split('T')[0];
         let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
         
         if (p.last_checkin === today) {
-            alert('📅 Hôm nay bạn đã điểm danh nhận chìa khóa rồi!');
+            alert('📅 Hôm nay bạn đã điểm danh rồi!');
             return;
         }
         p.keys += 2;
@@ -188,17 +177,16 @@
         alert('🎉 Điểm danh thành công! Nhận +2 Chìa Khóa.');
     }
 
-    async function openChest() {
-        if (!currentUser) { alert('⚠️ Vui lòng đăng nhập Discord trước!'); return; }
+    function openChest() {
+        if (!currentUser) { alert('⚠️ Vui lòng đăng nhập trước!'); return; }
         let p = serverData.rankings.find(u => u.discord_id === currentUser.discord_id);
         
         if (p.keys <= 0) {
-            alert('❌ Bạn đã hết chìa khóa! Hãy điểm danh hằng ngày để nhận thêm.');
+            alert('❌ Bạn đã hết chìa khóa!');
             return;
         }
 
         p.keys -= 1;
-
         const rand = Math.random() * 100;
         let chosenRarity = "common";
         if (rand > 97) chosenRarity = "legendary";
@@ -214,7 +202,7 @@
 
         saveLocal();
         renderUI();
-        alert(`🎁 Mở rương nhận được: [${item.name.toUpperCase()}] (${item.rarity.toUpperCase()}) +${item.power} lực!`);
+        alert(`🎁 Nhận được: [${item.name.toUpperCase()}] (${item.rarity.toUpperCase()}) +${item.power} lực!`);
     }
 
     function renderUI() {
@@ -239,7 +227,7 @@
                 const grid = document.getElementById('inventoryGrid');
                 grid.innerHTML = '';
                 if (p.items.length === 0) {
-                    grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">Túi đồ trống. Hãy mở rương ngay!</div>`;
+                    grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">Túi đồ trống.</div>`;
                 } else {
                     p.items.forEach(item => {
                         const div = document.createElement('div');
@@ -269,15 +257,19 @@
             if (index === 1) medal = '🥈';
             if (index === 2) medal = '🥉';
 
+            // Hiển thị tên tạm lấy từ ID hoặc ẩn danh, file JSON lưu trữ tuyệt đối chỉ lưu id
+            const displayName = (currentUser && user.discord_id === currentUser.discord_id) ? currentUser.username : `Chiến Thần #${user.discord_id.slice(-4)}`;
+            const displayAvatar = (currentUser && user.discord_id === currentUser.discord_id) ? currentUser.avatar : null;
+
             const li = document.createElement('li');
             li.className = 'leaderboard-item';
             li.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; background: #5865f2; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #fff;">
-                        ${user.avatar ? `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;">` : user.name.substring(0,2).toUpperCase()}
+                        ${displayAvatar ? `<img src="${displayAvatar}" style="width:100%;height:100%;object-fit:cover;">` : '🎮'}
                     </div>
                     <div>
-                        <strong class="rank-badge">${medal} ${user.name}</strong>
+                        <strong class="rank-badge">${medal} ${displayName}</strong>
                         <div style="font-size: 11px; color: var(--text-secondary);">Rank: ${user.rank} | Đồ: ${user.items.length} món</div>
                     </div>
                 </div>
