@@ -1,2 +1,2 @@
-# self-bot-autoq
+# fun
 auto 
