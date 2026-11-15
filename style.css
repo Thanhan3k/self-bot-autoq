@@ -1,7 +1,7 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    /* Nền gradient chuyển màu tím hồng rực rỡ như ảnh mẫu */
-    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    /* Nền ngoài chuyển thành màu trắng tinh khiết */
+    background-color: #ffffff;
     color: #334155;
     display: flex;
     justify-content: center;
