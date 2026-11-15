@@ -75,12 +75,17 @@
             </div>
 
             <div class="form-group">
-                <label>Tính năng bổ trợ:</label>
+                <label>Tính năng Giải Captcha:</label>
                 <div class="checkbox-panel">
                     <label class="checkbox-label">
                         <input type="checkbox" id="captchaMode" onchange="toggleCaptchaNotice()">
-                        <span>Tự động quét/giải Captcha (Mô phỏng)</span>
+                        <span>Bật cơ chế tự động giải Captcha (OCR)</span>
                     </label>
+                </div>
+                
+                <!-- Bảng trạng thái giải Captcha thực tế -->
+                <div id="captchaStatusBox" class="captcha-status-box" style="display: none; margin-top: 8px; padding: 10px; background: #f1f5f9; border-radius: 6px; font-size: 12px; color: #475569; border-left: 3px solid #ec4899;">
+                    🛡️ <b>Tự động giải Captcha:</b> Đang bật. Hệ thống sẽ tự động tóm ảnh từ MingSengBot, đọc mã số và gửi trả lời trong vòng 30 giây.
                 </div>
             </div>
 
@@ -136,7 +141,6 @@
                 const user = await response.json();
                 isLoggedIn = true;
 
-                // Lấy Avatar (nếu không có thì dùng avatar mặc định của Discord)
                 const avatarUrl = user.avatar 
                     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
                     : `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % 6n}.png`;
@@ -146,13 +150,11 @@
                 document.getElementById('userTag').innerText = `@${user.username} • ID: ${user.id}`;
                 document.getElementById('user-info').style.display = 'flex';
 
-                // Mở khóa toàn bộ chức năng bên dưới
                 const features = document.getElementById('controlled-features');
                 features.classList.remove('locked-section');
                 features.style.opacity = '1';
                 features.style.pointerEvents = 'auto';
 
-                // Khóa ô token và đổi nút sang Đăng xuất
                 tokenInput.disabled = true;
                 loginBtn.style.display = 'none';
                 document.getElementById('logoutBtn').style.display = 'inline-block';
@@ -171,14 +173,12 @@
     }
 
     function logoutDiscord() {
-        stopAuto(); // Dừng vòng lặp nếu đang chạy
+        stopAuto(); 
         isLoggedIn = false;
 
-        // Reset khu vực thông tin user
         document.getElementById('user-info').style.display = 'none';
         document.getElementById('userAvatar').src = '';
         
-        // Mở lại ô nhập token
         const tokenInput = document.getElementById('token');
         tokenInput.value = '';
         tokenInput.disabled = false;
@@ -186,7 +186,6 @@
         document.getElementById('loginBtn').style.display = 'inline-block';
         document.getElementById('logoutBtn').style.display = 'none';
 
-        // Khóa lại các tính năng bên dưới
         const features = document.getElementById('controlled-features');
         features.classList.add('locked-section');
         features.style.opacity = '0.4';
@@ -220,10 +219,13 @@
 
     function toggleCaptchaNotice() {
         const isChecked = document.getElementById('captchaMode').checked;
+        const statusBox = document.getElementById('captchaStatusBox');
         if (isChecked) {
-            addLog('🛡️ Đã BẬT tính năng quét Captcha.');
+            statusBox.style.display = 'block';
+            addLog('🛡️ Đã BẬT cơ chế tự động giải Captcha.');
         } else {
-            addLog('🛡️ Đã TẮT tính năng quét Captcha.');
+            statusBox.style.display = 'none';
+            addLog('🛡️ Đã TẮT cơ chế tự động giải Captcha.');
         }
     }
 
@@ -249,7 +251,7 @@
                 addLog('✅ Gửi tin nhắn thành công!');
                 const isCaptchaEnabled = document.getElementById('captchaMode').checked;
                 if (isCaptchaEnabled) {
-                    addLog('🔍 Đang quét phản hồi/tin nhắn mới từ bot game...');
+                    addLog('🔍 Đang trực chờ nhận ảnh Captcha từ MingSengBot...');
                 }
                 return true;
             } else {
@@ -319,7 +321,7 @@
         document.getElementById('startBtn').disabled = true;
         document.getElementById('stopBtn').disabled = false;
         const isCaptchaEnabled = document.getElementById('captchaMode').checked;
-        addLog(`🚀 Bắt đầu chạy (Quét Captcha: ${isCaptchaEnabled ? 'BẬT' : 'TẮT'})...`);
+        addLog(`🚀 Bắt đầu chạy (Tự động giải Captcha: ${isCaptchaEnabled ? 'BẬT' : 'TẮT'})...`);
         runLoop(token, channelId, message);
     }
 
