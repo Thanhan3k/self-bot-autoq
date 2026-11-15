@@ -63,6 +63,17 @@ h2, h3 {
     border: 1px solid var(--border-subtle);
 }
 
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #1e1f22;
+    color: #fff;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
 .inventory-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -91,7 +102,7 @@ h2, h3 {
 .rarity-epic { border-color: #9b59b6; color: #af7ac5; }
 .rarity-legendary { border-color: #f1c40f; color: #f1c40f; font-weight: bold; }
 
-button, .btn-discord {
+button {
     width: 100%;
     padding: 12px;
     border: none;
@@ -101,22 +112,17 @@ button, .btn-discord {
     font-weight: 600;
     cursor: pointer;
     color: #fff;
-    text-align: center;
-    text-decoration: none;
-    display: block;
     transition: 0.2s;
     margin-top: 8px;
 }
 
-button:active, .btn-discord:active { transform: scale(0.98); }
+button:active { transform: scale(0.98); }
 
 .btn-primary { background-color: var(--primary); }
 .btn-primary:hover { background-color: var(--primary-hover); }
 .btn-success { background-color: var(--green); }
 .btn-success:hover { background-color: var(--green-hover); }
 .btn-gold { background-color: #d4ac0d; }
-.btn-discord { background-color: #5865f2; }
-.btn-discord:hover { background-color: #4752c4; }
 .btn-danger { background-color: var(--red); }
 
 .leaderboard-list {
