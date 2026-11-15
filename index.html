@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Arena & Streak Master</title>
+    <link rel="stylesheet" href="./style.css?v=3">
+</head>
+<body>
+
+<div class="app-container">
+    <!-- CỘT TRÁI: QUẢN LÝ CÁ NHÂN & POMODORO -->
+    <div class="panel left-panel">
+        <h2>✨ Góc Tập Trung & Streak</h2>
+        
+        <!-- Khu vực Đăng nhập Discord OAuth2 -->
+        <div id="loginSection">
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Đăng nhập bằng Discord để tham gia bảng xếp hạng:</p>
+            <!-- LƯU Ý: Thay YOUR_CLIENT_ID bằng Client ID ứng dụng Discord Developer Portal của bạn -->
+            <!-- Thay LINK_GITHUB_PAGES bằng URL trang GitHub Pages của bạn -->
+            <a id="discordLoginBtn" href="#" class="btn-discord">
+                🎮 Đăng nhập bằng Discord
+            </a>
+        </div>
+
+        <!-- Thông tin User (Ẩn khi chưa đăng nhập) -->
+        <div class="user-card" id="userCard" style="display: none;">
+            <div class="avatar" id="userAvatar">?</div>
+            <div style="flex: 1; overflow: hidden;">
+                <h3 id="userName" style="margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">User</h3>
+                <span style="font-size: 13px; color: var(--text-secondary);">Rank: <strong id="userRank" style="color: var(--gold);">Tập Sự</strong></span>
+            </div>
+            <button onclick="logoutDiscord()" style="width: auto; padding: 6px 10px; font-size: 11px; background: var(--red);">Thoát</button>
+        </div>
+
+        <!-- Cấu hình GitHub API lưu file data.json -->
+        <details style="font-size: 12px; color: var(--text-secondary); cursor: pointer; margin-bottom: 15px;">
+            <summary>⚙️ Cấu hình đồng bộ GitHub data.json</summary>
+            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                <input type="text" id="ghOwner" placeholder="GitHub Username (VD: Thanhan3k)" style="padding: 6px; border-radius: 4px; border: none; background: #1e1f22; color: #fff;">
+                <input type="text" id="ghRepo" placeholder="Tên Repository" style="padding: 6px; border-radius: 4px; border: none; background: #1e1f22; color: #fff;">
+                <input type="password" id="ghToken" placeholder="GitHub Personal Access Token" style="padding: 6px; border-radius: 4px; border: none; background: #1e1f22; color: #fff;">
+                <button class="btn-success" onclick="saveGitHubConfig()" style="padding: 6px; font-size: 12px;">Lưu Cấu Hình</button>
+            </div>
+        </details>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                Chuỗi Streak 🔥
+                <span id="streakCount">0 Ngày</span>
+            </div>
+            <div class="stat-box">
+                Tổng Giờ Focus ⏱️
+                <span id="focusMinutes">0 Phút</span>
+            </div>
+        </div>
+
+        <button class="btn-success" id="checkinBtn" onclick="dailyCheckin()">📅 Điểm Danh Nhận Streak Hôm Nay</button>
+
+        <!-- Đồng hồ Pomodoro -->
+        <div class="timer-box">
+            <h3>🍅 Phiên Tập Trung (25 Phút)</h3>
+            <div class="timer-display" id="timerDisplay">25:00</div>
+            <button class="btn-primary" id="timerBtn" onclick="toggleTimer()">Bắt Đầu Focus</button>
+        </div>
+    </div>
+
+    <!-- CỘT PHẢI: BẢNG XẾP HẠNG -->
+    <div class="panel right-panel">
+        <h2>🏆 Bảng Xếp Hạng Server</h2>
+        <p id="syncStatus" style="font-size: 12px; color: var(--text-secondary); margin-top: -10px;">Đang kết nối server...</p>
+        
+        <ul class="leaderboard-list" id="leaderboardList">
+            <!-- Đổ dữ liệu từ data.json -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    // --- CẤU HÌNH DISCORD OAUTH2 ---
+    // Thay Client ID của bạn vào đây
+    const DISCORD_CLIENT_ID = "123456789012345678"; 
+    // Tự động lấy URL hiện tại làm Redirect URI cho GitHub Pages
+    const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+    document.getElementById('discordLoginBtn').href = 
+        `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+
+    let serverData = { rankings: [] };
+    let currentUser = JSON.parse(localStorage.getItem('discord_user')) || null;
+
+    let ghConfig = JSON.parse(localStorage.getItem('gh_config')) || {
+        owner: "", repo: "", token: ""
+    };
+
+    document.getElementById('ghOwner').value = ghConfig.owner;
+    document.getElementById('ghRepo').value = ghConfig.repo;
+    document.getElementById('ghToken').value = ghConfig.token;
+
+    function saveGitHubConfig() {
+        ghConfig = {
+            owner: document.getElementById('ghOwner').value.trim(),
+            repo: document.getElementById('ghRepo').value.trim(),
+            token: document.getElementById('ghToken').value.trim()
+        };
+        localStorage.setItem('gh_config', JSON.stringify(ghConfig));
+        alert('✅ Đã lưu cấu hình GitHub!');
+        loadDataFromJSON();
+    }
+
+    // --- BẮT TOKEN DISCORD KHI REDIRECT VỀ ---
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = fragment.get('access_token');
+
+    if (accessToken) {
+        fetch('https://discord.com/api/users/@me', {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        })
+        .then(res => res.json())
+        .then(user => {
+            currentUser = {
+                id: user.id,
+                username: user.username,
+                avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : null
+            };
+            localStorage.setItem('discord_user', JSON.stringify(currentUser));
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window.location.reload();
+        })
+        .catch(err => console.error('Lỗi lấy thông tin Discord:', err));
+    }
+
+    function logoutDiscord() {
+        localStorage.removeItem('discord_user');
+        location.reload();
+    }
+
+    function calculateRank(minutes) {
+        if (minutes >= 3000) return "Thần Đồng 👑";
+        if (minutes >= 1500) return "Giáo Sư 🎓";
+        if (minutes >= 500) return "Học Bá 🔥";
+        if (minutes > 0) return "Chăm Chỉ ✨";
+        return "Tập Sự";
+    }
+
+    // --- ĐỌC & GHI DỮ LIỆU TỪ GITHUB data.json ---
+    async function loadDataFromJSON() {
+        const statusEl = document.getElementById('syncStatus');
+        try {
+            const response = await fetch(`./data.json?t=${new Date().getTime()}`);
+            if (response.ok) {
+                serverData = await response.json();
+                if (!serverData.rankings) serverData.rankings = [];
+                statusEl.innerText = "🟢 Đồng bộ thành công";
+            } else {
+                statusEl.innerText = "⚪ Chưa có data.json (Chế độ cục bộ)";
+            }
+        } catch (e) {
+            statusEl.innerText = "⚪ Chế độ Offline";
+        }
+        renderUI();
+    }
+
+    async function saveDataToJSON() {
+        const statusEl = document.getElementById('syncStatus');
+        if (!ghConfig.owner || !ghConfig.repo || !ghConfig.token) {
+            statusEl.innerText = "🟡 Đã lưu cục bộ (Chưa cấu hình GitHub Token)";
+            renderUI();
+            return;
+        }
+
+        statusEl.innerText = "⏳ Đang ghi vào data.json...";
+        const apiUrl = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/data.json`;
+
+        try {
+            let sha = "";
+            const getRes = await fetch(apiUrl, {
+                headers: { 'Authorization': `token ${ghConfig.token}` }
+            });
+            if (getRes.ok) {
+                const fileInfo = await getRes.json();
+                sha = fileInfo.sha;
+            }
+
+            const jsonString = JSON.stringify(serverData, null, 2);
+            const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
+
+            const putRes = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${ghConfig.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `Update data.json - ${currentUser.username}`,
+                    content: base64Content,
+                    sha: sha || undefined
+                })
+            });
+
+            if (putRes.ok) {
+                statusEl.innerText = "✅ Đã cập nhật data.json!";
+            } else {
+                statusEl.innerText = "❌ Lỗi ghi GitHub API";
+            }
+        } catch (error) {
+            statusEl.innerText = "❌ Lỗi mạng GitHub";
+        }
+        renderUI();
+    }
+
+    function updatePlayerRecord(addStreak, addMinutes) {
+        if (!currentUser) {
+            alert('⚠️ Vui lòng đăng nhập Discord trước!');
+            return false;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        let player = serverData.rankings.find(u => u.discord_id === currentUser.id);
+
+        if (!player) {
+            player = {
+                discord_id: currentUser.id,
+                name: currentUser.username,
+                avatar: currentUser.avatar,
+                streak: 0,
+                minutes: 0,
+                last_checkin: "",
+                rank: "Tập Sự"
+            };
+            serverData.rankings.push(player);
+        }
+
+        // Cập nhật lại tên/avatar mới nhất từ Discord nếu có thay đổi
+        player.name = currentUser.username;
+        player.avatar = currentUser.avatar;
+
+        if (addStreak > 0) {
+            if (player.last_checkin === today) {
+                alert('📅 Hôm nay bạn đã điểm danh rồi!');
+                return false;
+            }
+            player.streak += addStreak;
+            player.last_checkin = today;
+        }
+
+        if (addMinutes > 0) {
+            player.minutes += addMinutes;
+        }
+
+        player.rank = calculateRank(player.minutes);
+        return true;
+    }
+
+    async function dailyCheckin() {
+        if (updatePlayerRecord(1, 0)) {
+            await saveDataToJSON();
+            alert('🎉 Điểm danh thành công!');
+        }
+    }
+
+    // --- HIỂN THỊ GIAO DIỆN ---
+    function renderUI() {
+        if (currentUser) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('userCard').style.display = 'flex';
+            document.getElementById('userName').innerText = currentUser.username;
+            
+            const avatarEl = document.getElementById('userAvatar');
+            if (currentUser.avatar) {
+                avatarEl.innerHTML = `<img src="${currentUser.avatar}" alt="Avatar">`;
+            } else {
+                avatarEl.innerText = currentUser.username.substring(0, 2).toUpperCase();
+            }
+
+            const me = serverData.rankings.find(u => u.discord_id === currentUser.id);
+            if (me) {
+                document.getElementById('streakCount').innerText = `${me.streak} Ngày`;
+                document.getElementById('focusMinutes').innerText = `${me.minutes} Phút`;
+                document.getElementById('userRank').innerText = me.rank;
+            } else {
+                document.getElementById('streakCount').innerText = `0 Ngày`;
+                document.getElementById('focusMinutes').innerText = `0 Phút`;
+                document.getElementById('userRank').innerText = `Tập Sự`;
+            }
+        } else {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('userCard').style.display = 'none';
+        }
+
+        const listEl = document.getElementById('leaderboardList');
+        listEl.innerHTML = '';
+
+        if (serverData.rankings.length === 0) {
+            listEl.innerHTML = `<li style="text-align: center; color: var(--text-secondary); padding: 30px 10px; font-size: 14px;">Chưa có dữ liệu xếp hạng.</li>`;
+            return;
+        }
+
+        const sorted = [...serverData.rankings].sort((a, b) => b.minutes - a.minutes || b.streak - a.streak);
+
+        sorted.forEach((user, index) => {
+            let medal = `<span>#${index + 1}</span>`;
+            if (index === 0) medal = '🥇';
+            if (index === 1) medal = '🥈';
+            if (index === 2) medal = '🥉';
+
+            const li = document.createElement('li');
+            li.className = 'leaderboard-item';
+            li.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #5865f2; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; font-size: 12px;">
+                        ${user.avatar ? `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;">` : user.name.substring(0,2).toUpperCase()}
+                    </div>
+                    <div>
+                        <strong class="rank-badge">${medal} ${user.name}</strong>
+                        <div style="font-size: 11px; color: var(--text-secondary);">🔥 Streak: ${user.streak} ngày | ${user.rank}</div>
+                    </div>
+                </div>
+                <div style="font-weight: bold; color: var(--primary);">${user.minutes} phút</div>
+            `;
+            listEl.appendChild(li);
+        });
+    }
+
+    // --- POMODORO TIMER ---
+    let timerInterval = null;
+    let timeLeft = 25 * 60;
+    let isRunning = false;
+
+    function toggleTimer() {
+        if (!currentUser) {
+            alert('⚠️ Vui lòng đăng nhập Discord trước khi bắt đầu Focus!');
+            return;
+        }
+
+        const btn = document.getElementById('timerBtn');
+        if (!isRunning) {
+            isRunning = true;
+            btn.innerText = "Tạm Dừng";
+            btn.className = "btn-danger";
+
+            timerInterval = setInterval(async () => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    if (updatePlayerRecord(0, 25)) {
+                        await saveDataToJSON();
+                        alert('🎯 Hoàn thành 25 phút Focus! Đã lưu lên server.');
+                    }
+                    resetTimer();
+                }
+            }, 1000);
+        } else {
+            clearInterval(timerInterval);
+            isRunning = false;
+            btn.innerText = "Tiếp Tục Focus";
+            btn.className = "btn-primary";
+        }
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        timeLeft = 25 * 60;
+        document.getElementById('timerBtn').innerText = "Bắt Đầu Focus";
+        document.getElementById('timerBtn').className = "btn-primary";
+        updateTimerDisplay();
+    }
+
+    loadDataFromJSON();
+</script>
+
+</body>
+</html>
