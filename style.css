@@ -1,129 +1,186 @@
 body {
-    font-family: sans-serif;
-    background-color: #1e1f22;
-    color: #dbdee1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Nền gradient chuyển màu tím hồng rực rỡ như ảnh mẫu */
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    color: #334155;
     display: flex;
     justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .container {
-    background-color: #2b2d31;
-    padding: 20px;
-    border-radius: 8px;
+    /* Khung card màu trắng tinh, bo góc lớn, bóng đổ nổi bật */
+    background-color: #ffffff;
+    padding: 32px 28px;
+    border-radius: 16px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-width: 440px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 h2 {
     text-align: center;
-    color: #fff;
+    color: #1e293b;
     margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.form-group {
+    margin-bottom: 16px;
 }
 
 label {
     display: block;
-    margin-top: 12px;
-    font-size: 14px;
-    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
 }
 
+/* Kiểu input gạch chân tối giản thanh lịch giống ảnh mẫu */
 input[type="text"],
 input[type="password"],
 input[type="number"],
 textarea {
     width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 4px;
-    border: 1px solid #1e1f22;
-    background-color: #383a40;
-    color: #fff;
+    padding: 10px 4px;
+    margin-top: 4px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 2px solid #e2e8f0;
+    background-color: transparent;
+    color: #1e293b;
+    font-size: 14px;
     box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-bottom-color: #ec4899;
+    background-color: transparent;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #cbd5e1;
 }
 
 input:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
-.time-mode {
-    margin-top: 8px;
-    background-color: #232428;
+textarea {
+    resize: vertical;
+    min-height: 70px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     padding: 10px;
-    border-radius: 6px;
+    background-color: #f8fafc;
 }
 
-.radio-label {
+textarea:focus {
+    border-color: #ec4899;
+    background-color: #fff;
+}
+
+/* Tab chế độ thời gian */
+.mode-tabs {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 0;
-    font-weight: normal;
-    cursor: pointer;
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 10px;
 }
 
-.radio-label input[type="radio"] {
-    width: auto;
-    margin: 0;
-}
-
-.range-inputs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 5px;
-}
-
-.range-inputs span {
-    font-weight: bold;
-    color: #b5bac1;
-}
-
-.btn-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-button {
+.tab-btn {
     flex: 1;
-    padding: 12px;
+    background-color: transparent;
     border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    color: white;
-}
-
-#startBtn {
-    background-color: #5865f2;
-}
-
-#startBtn:disabled {
-    background-color: #4752c4;
-    opacity: 0.6;
-}
-
-#stopBtn {
-    background-color: #da373c;
-}
-
-#log {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #1e1f22;
-    border-radius: 4px;
-    height: 150px;
-    overflow-y: auto;
+    color: #64748b;
+    padding: 8px;
     font-size: 13px;
-    font-family: monospace;
-}
-.checkbox-panel {
-    background-color: #232428;
-    border: 1px solid #1e1f22;
+    font-weight: 600;
     border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background-color: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.time-panel {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.input-with-unit {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    padding-right: 10px;
+    overflow: hidden;
+}
+
+.input-with-unit input {
+    border: none !important;
+    background: transparent;
+    padding: 8px 10px;
+    color: #1e293b;
+    font-size: 14px;
+    width: 100%;
+}
+
+.unit {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.sub-label {
+    font-size: 12px;
+    color: #64748b;
+    padding-left: 10px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.range-wrapper .input-with-unit {
+    flex: 1;
+}
+
+.range-dash {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Checkbox phụ trợ */
+.checkbox-panel {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     padding: 10px 12px;
 }
 
@@ -134,16 +191,80 @@ button {
     cursor: pointer;
     font-size: 14px;
     font-weight: normal;
-    color: #dbdee1;
-    text-transform: none;
-    letter-spacing: normal;
+    color: #334155;
     margin-bottom: 0;
 }
 
 .checkbox-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #5865f2;
+    accent-color: #ec4899;
     cursor: pointer;
     margin: 0;
+}
+
+/* Nhóm nút bấm bo tròn viền gradient cực xịn */
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+button {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 50px; /* Bo tròn lồi hẳn ra như ảnh mẫu */
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    color: white;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#startBtn {
+    /* Nút chạy dùng chuẩn màu gradient cam/hồng/tím giống nút Login ở mẫu */
+    background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%);
+    flex: 2;
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+}
+
+#startBtn:disabled {
+    background: #cbd5e1;
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+#stopBtn {
+    background: #ef4444;
+    flex: 1;
+    border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+#stopBtn:disabled {
+    background: #cbd5e1;
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+#log {
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #0f172a;
+    border-radius: 8px;
+    height: 140px;
+    overflow-y: auto;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: #38bdf8;
+    border: 1px solid #334155;
 }
