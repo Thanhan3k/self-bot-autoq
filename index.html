@@ -133,11 +133,9 @@
             if (response.ok) {
                 addLog('✅ Gửi tin nhắn thành công!');
                 
-                // Kiểm tra xem trạng thái bật/tắt quét captcha
                 const isCaptchaEnabled = document.getElementById('captchaMode').checked;
                 if (isCaptchaEnabled) {
                     addLog('🔍 Đang quét phản hồi/tin nhắn mới từ bot game...');
-                    // Chỗ này sau này bạn có thể tích hợp code gọi API quét tin nhắn/ảnh captcha trả về
                 }
 
                 return true;
