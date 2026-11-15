@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+    --bg-dark: #18191c;
+    --card-bg: #232428;
+    --card-inner: #2b2d31;
+    --primary: #5865f2;
+    --primary-hover: #4752c4;
+    --green: #23a55a;
+    --green-hover: #1a7f44;
+    --gold: #f0b232;
+    --text-primary: #f2f3f5;
+    --text-secondary: #b5bac1;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 24px;
+    width: 100%;
+    max-width: 960px;
+}
+
+.panel {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+h2, h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: #fff;
+}
+
+/* Nhập tên nhân vật */
+.profile-box {
+    background-color: var(--card-inner);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-subtle);
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #1e1f22;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+/* Kho đồ (Inventory Grid) */
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.item-slot {
+    background-color: #1e1f22;
+    border: 2px solid #383a40;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    font-size: 11px;
+    min-height: 65px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Màu viền theo độ hiếm vật phẩm */
+.rarity-common { border-color: #949ba4; color: #949ba4; }
+.rarity-rare { border-color: #2383e2; color: #5865f2; }
+.rarity-epic { border-color: #9b59b6; color: #af7ac5; }
+.rarity-legendary { border-color: #f1c40f; color: #f1c40f; font-weight: bold; }
+
+/* Nút bấm */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    transition: 0.2s;
+    margin-top: 8px;
+}
+
+.btn-primary { background-color: var(--primary); }
+.btn-primary:hover { background-color: var(--primary-hover); }
+.btn-success { background-color: var(--green); }
+.btn-success:hover { background-color: var(--green-hover); }
+.btn-gold { background-color: #d4ac0d; }
+
+/* Bảng xếp hạng */
+.leaderboard-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.leaderboard-item {
+    background-color: var(--card-inner);
+    padding: 12px 16px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border-subtle);
+}
+
+.rank-badge {
+    font-size: 15px;
+    color: var(--gold);
+}
+
+@media (max-width: 768px) {
+    .app-container { grid-template-columns: 1fr; }
+}
