@@ -343,3 +343,74 @@ button:hover {
     color: #38bdf8;
     border: 1px solid #334155;
 }
+.login-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.login-input-group input[type="password"] {
+    flex: 1;
+}
+
+#loginBtn {
+    background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(236, 72, 153, 0.2);
+    white-space: nowrap;
+}
+
+#logoutBtn {
+    background: #ef4444;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Thẻ card hiển thị Avatar và tên sau khi login thành công */
+.user-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 8px;
+}
+
+.user-profile-card img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #cbd5e1;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.display-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-tag {
+    font-size: 11px;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
