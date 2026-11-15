@@ -57,7 +57,7 @@ h2, h3 {
 
 .profile-box {
     background-color: var(--card-inner);
-    padding: 16px;
+    padding: 14px;
     border-radius: 12px;
     margin-bottom: 16px;
     border: 1px solid var(--border-subtle);
@@ -74,34 +74,33 @@ input {
     font-size: 13px;
 }
 
-.inventory-grid {
+/* Thống kê tài nguyên */
+.resource-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-top: 12px;
-    max-height: 180px;
-    overflow-y: auto;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
-.item-slot {
-    background-color: #1e1f22;
-    border: 2px solid #383a40;
-    border-radius: 8px;
-    padding: 8px;
+.resource-box {
+    background-color: var(--card-inner);
+    padding: 12px;
+    border-radius: 10px;
     text-align: center;
-    font-size: 11px;
-    min-height: 65px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
 }
 
-.rarity-common { border-color: #949ba4; color: #949ba4; }
-.rarity-rare { border-color: #2383e2; color: #5865f2; }
-.rarity-epic { border-color: #9b59b6; color: #af7ac5; }
-.rarity-legendary { border-color: #f1c40f; color: #f1c40f; font-weight: bold; }
+.resource-box span {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-top: 4px;
+}
 
+/* Nút bấm */
 button {
     width: 100%;
     padding: 12px;
@@ -125,12 +124,15 @@ button:active { transform: scale(0.98); }
 .btn-gold { background-color: #d4ac0d; }
 .btn-danger { background-color: var(--red); }
 
+/* Bảng xếp hạng */
 .leaderboard-list {
     list-style: none;
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 14px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .leaderboard-item {
