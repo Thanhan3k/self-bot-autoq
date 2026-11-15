@@ -9,6 +9,7 @@
     --green: #23a55a;
     --green-hover: #1a7f44;
     --gold: #f0b232;
+    --red: #ed4245;
     --text-primary: #f2f3f5;
     --text-secondary: #b5bac1;
     --border-subtle: rgba(255, 255, 255, 0.06);
@@ -27,8 +28,8 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding: 40px 20px;
+    align-items: center; /* Căn giữa hoàn toàn theo chiều dọc và ngang */
+    padding: 20px;
 }
 
 .app-container {
@@ -54,23 +55,13 @@ h2, h3 {
     color: #fff;
 }
 
-/* Nhập tên nhân vật */
+/* Khung thông tin cá nhân / Đăng nhập */
 .profile-box {
     background-color: var(--card-inner);
     padding: 16px;
     border-radius: 12px;
     margin-bottom: 16px;
     border: 1px solid var(--border-subtle);
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: none;
-    background: #1e1f22;
-    color: #fff;
-    margin-bottom: 8px;
 }
 
 /* Kho đồ (Inventory Grid) */
@@ -103,8 +94,8 @@ input {
 .rarity-epic { border-color: #9b59b6; color: #af7ac5; }
 .rarity-legendary { border-color: #f1c40f; color: #f1c40f; font-weight: bold; }
 
-/* Nút bấm */
-button {
+/* Nút bấm chuẩn */
+button, .btn-discord {
     width: 100%;
     padding: 12px;
     border: none;
@@ -114,15 +105,23 @@ button {
     font-weight: 600;
     cursor: pointer;
     color: #fff;
+    text-align: center;
+    text-decoration: none;
+    display: block;
     transition: 0.2s;
     margin-top: 8px;
 }
+
+button:active, .btn-discord:active { transform: scale(0.98); }
 
 .btn-primary { background-color: var(--primary); }
 .btn-primary:hover { background-color: var(--primary-hover); }
 .btn-success { background-color: var(--green); }
 .btn-success:hover { background-color: var(--green-hover); }
 .btn-gold { background-color: #d4ac0d; }
+.btn-discord { background-color: #5865f2; }
+.btn-discord:hover { background-color: #4752c4; }
+.btn-danger { background-color: var(--red); }
 
 /* Bảng xếp hạng */
 .leaderboard-list {
