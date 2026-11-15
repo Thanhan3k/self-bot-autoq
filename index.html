@@ -8,6 +8,244 @@
 </head>
 <body>
 
+<div class="main-wrapper">
+    <!-- Cột bên trái: Form nhập liệu -->
+    <div class="form-container">
+        <h2>Auto Nhắn Tin Discord</h2>
+        
+        <div class="form-group">
+            <label>User Token:</label>
+            <input type="password" id="token" placeholder="Dán token tài khoản vào đây">
+        </div>
+
+        <div class="form-group">
+            <label>ID Kênh Chat (Channel ID):</label>
+            <input type="text" id="channelId" placeholder="Ví dụ: 123456789012345678">
+        </div>
+
+        <div class="form-group">
+            <label>Nội dung tin nhắn:</label>
+            <textarea id="message" rows="3" placeholder="Nhập nội dung muốn gửi..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Chế độ thời gian nghỉ:</label>
+            <div class="mode-tabs">
+                <button type="button" class="tab-btn active" data-mode="fixed" onclick="switchMode('fixed')">Cố định</button>
+                <button type="button" class="tab-btn" data-mode="random" onclick="switchMode('random')">Ngẫu nhiên</button>
+            </div>
+
+            <div id="fixedContainer" class="time-panel">
+                <div class="input-with-unit">
+                    <input type="number" id="fixedDelay" value="90" min="1">
+                    <span class="unit">giây</span>
+                </div>
+            </div>
+
+            <div id="randomContainer" class="time-panel" style="display: none;">
+                <div class="range-wrapper">
+                    <div class="input-with-unit">
+                        <span class="sub-label">Từ</span>
+                        <input type="number" id="minDelay" value="60" min="1">
+                    </div>
+                    <span class="range-dash">đến</span>
+                    <div class="input-with-unit">
+                        <span class="sub-label">Đến</span>
+                        <input type="number" id="maxDelay" value="120" min="1">
+                    </div>
+                    <span class="unit">giây</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tùy chọn bật/tắt quét Captcha -->
+        <div class="form-group">
+            <label>Tính năng bổ trợ:</label>
+            <div class="checkbox-panel">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="captchaMode" onchange="toggleCaptchaNotice()">
+                    <span>Tự động quét/giải Captcha (Mô phỏng)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button id="startBtn" onclick="startAuto()">Bắt đầu chạy</button>
+            <button id="stopBtn" onclick="stopAuto()" disabled>Dừng lại</button>
+        </div>
+
+        <div id="log">Sẵn sàng...</div>
+    </div>
+
+    <!-- Cột bên phải: Thumbnail bằng link ảnh (giống ảnh mẫu) -->
+    <div class="thumbnail-container">
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80" alt="Thumbnail Preview">
+        <div class="thumbnail-overlay">
+            <div class="badge">🚀 Active Tool</div>
+            <h3>Hệ thống treo Auto Discord thông minh</h3>
+            <p>"Giúp tự động hóa tin nhắn, tối ưu thời gian nghỉ ngẫu nhiên và vượt qua các thử thách dễ dàng."</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let timer = null;
+    let isRunning = false;
+    let currentMode = 'fixed';
+
+    function switchMode(mode) {
+        currentMode = mode;
+        const fixedContainer = document.getElementById('fixedContainer');
+        const randomContainer = document.getElementById('randomContainer');
+        const buttons = document.querySelectorAll('.tab-btn');
+
+        buttons.forEach(btn => {
+            if (btn.getAttribute('data-mode') === mode) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        if (mode === 'fixed') {
+            fixedContainer.style.display = 'block';
+            randomContainer.style.display = 'none';
+        } else {
+            fixedContainer.style.display = 'none';
+            randomContainer.style.display = 'block';
+        }
+    }
+
+    function toggleCaptchaNotice() {
+        const isChecked = document.getElementById('captchaMode').checked;
+        if (isChecked) {
+            addLog('🛡️ Đã BẬT tính năng quét Captcha.');
+        } else {
+            addLog('🛡️ Đã TẮT tính năng quét Captcha.');
+        }
+    }
+
+    function addLog(text) {
+        const logDiv = document.getElementById('log');
+        const time = new Date().toLocaleTimeString();
+        logDiv.innerHTML += `<div>[${time}] ${text}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    async function sendMessage(token, channelId, content) {
+        try {
+            const response = await fetch(`https://discord.com/api/v9/channels/${channelId}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: content })
+            });
+
+            if (response.ok) {
+                addLog('✅ Gửi tin nhắn thành công!');
+                
+                const isCaptchaEnabled = document.getElementById('captchaMode').checked;
+                if (isCaptchaEnabled) {
+                    addLog('🔍 Đang quét phản hồi/tin nhắn mới từ bot game...');
+                }
+
+                return true;
+            } else {
+                const err = await response.json();
+                addLog(`❌ Lỗi (${response.status}): ${err.message || 'Kiểm tra lại Token/ID'}`);
+                stopAuto();
+                return false;
+            }
+        } catch (error) {
+            addLog(`⚠️ Lỗi mạng hoặc bị chặn CORS: ${error.message}`);
+            return true;
+        }
+    }
+
+    function getNextDelay() {
+        if (currentMode === 'fixed') {
+            return parseInt(document.getElementById('fixedDelay').value);
+        } else {
+            const min = parseInt(document.getElementById('minDelay').value);
+            const max = parseInt(document.getElementById('maxDelay').value);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+    }
+
+    async function runLoop(token, channelId, message) {
+        if (!isRunning) return;
+
+        const success = await sendMessage(token, channelId, message);
+        if (!success || !isRunning) return;
+
+        const nextDelaySec = getNextDelay();
+        addLog(`⏳ Chờ ${nextDelaySec} giây cho tin tiếp theo...`);
+
+        timer = setTimeout(() => {
+            runLoop(token, channelId, message);
+        }, nextDelaySec * 1000);
+    }
+
+    function startAuto() {
+        const token = document.getElementById('token').value.trim();
+        const channelId = document.getElementById('channelId').value.trim();
+        const message = document.getElementById('message').value.trim();
+
+        if (!token || !channelId || !message) {
+            alert('Vui lòng điền đầy đủ Token, ID kênh và Nội dung!');
+            return;
+        }
+
+        if (currentMode === 'fixed') {
+            const fixedSec = parseInt(document.getElementById('fixedDelay').value);
+            if (isNaN(fixedSec) || fixedSec < 1) {
+                alert('Thời gian cố định phải lớn hơn 0 giây!');
+                return;
+            }
+        } else {
+            const minSec = parseInt(document.getElementById('minDelay').value);
+            const maxSec = parseInt(document.getElementById('maxDelay').value);
+            if (isNaN(minSec) || isNaN(maxSec) || minSec < 1 || maxSec < minSec) {
+                alert('Khoảng thời gian không hợp lệ (Số "Đến" phải lớn hơn hoặc bằng số "Từ")!');
+                return;
+            }
+        }
+
+        isRunning = true;
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+        
+        const isCaptchaEnabled = document.getElementById('captchaMode').checked;
+        addLog(`🚀 Bắt đầu chạy (Quét Captcha: ${isCaptchaEnabled ? 'BẬT' : 'TẮT'})...`);
+
+        runLoop(token, channelId, message);
+    }
+
+    function stopAuto() {
+        isRunning = false;
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+        addLog('🛑 Đã dừng.');
+    }
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Send Message Discord</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
 <div class="container">
     <h2>Auto Nhắn Tin Discord</h2>
     
