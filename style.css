@@ -1,6 +1,5 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    /* Đổi nền ngoài thành màu trắng tinh khiết */
     background-color: #ffffff;
     color: #334155;
     display: flex;
@@ -12,46 +11,123 @@ body {
     box-sizing: border-box;
 }
 
-.container {
-    /* Khung card màu trắng tinh, bo góc lớn, bóng đổ nổi bật */
+/* Khung bọc tổng thể chia 2 cột giống ảnh mẫu */
+.main-wrapper {
+    display: flex;
     background-color: #ffffff;
-    padding: 32px 28px;
-    border-radius: 16px;
+    border-radius: 20px;
     width: 100%;
-    max-width: 440px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 900px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+}
+
+/* Cột bên trái (Form) */
+.form-container {
+    flex: 1.1;
+    padding: 32px;
+    box-sizing: border-box;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Cột bên phải (Thumbnail ảnh dùng link) */
+.thumbnail-container {
+    flex: 0.9;
+    position: relative;
+    background-color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    min-height: 500px;
+}
+
+.thumbnail-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+}
+
+/* Phần chữ đè lên ảnh ở góc dưới */
+.thumbnail-overlay {
+    position: relative;
+    z-index: 2;
+    padding: 30px;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 10%, rgba(15, 23, 42, 0) 100%);
+    color: #ffffff;
+}
+
+.badge {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.thumbnail-overlay h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.thumbnail-overlay p {
+    margin: 0;
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+
+/* Responsive khi màn hình nhỏ (chuyển về 1 cột dọc) */
+@media (max-width: 768px) {
+    .main-wrapper {
+        flex-direction: column;
+        max-width: 440px;
+    }
+    .thumbnail-container {
+        min-height: 220px;
+    }
 }
 
 h2 {
-    text-align: center;
+    text-align: left;
     color: #1e293b;
     margin-top: 0;
-    margin-bottom: 24px;
-    font-size: 24px;
+    margin-bottom: 20px;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: -0.5px;
 }
 
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 13px;
+    margin-bottom: 4px;
+    font-size: 12px;
     font-weight: 600;
     color: #64748b;
+    text-transform: uppercase;
 }
 
-/* Kiểu input gạch chân tối giản thanh lịch giống ảnh mẫu */
+/* Kiểu input gạch chân tối giản thanh lịch */
 input[type="text"],
 input[type="password"],
 input[type="number"],
 textarea {
     width: 100%;
-    padding: 10px 4px;
-    margin-top: 4px;
+    padding: 8px 4px;
+    margin-top: 2px;
     border-radius: 0;
     border: none;
     border-bottom: 2px solid #e2e8f0;
@@ -79,10 +155,10 @@ input:disabled {
 
 textarea {
     resize: vertical;
-    min-height: 70px;
+    min-height: 60px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 10px;
+    padding: 8px;
     background-color: #f8fafc;
 }
 
@@ -96,8 +172,8 @@ textarea:focus {
     display: flex;
     background-color: #f1f5f9;
     border-radius: 8px;
-    padding: 4px;
-    margin-bottom: 10px;
+    padding: 3px;
+    margin-bottom: 8px;
 }
 
 .tab-btn {
@@ -105,8 +181,8 @@ textarea:focus {
     background-color: transparent;
     border: none;
     color: #64748b;
-    padding: 8px;
-    font-size: 13px;
+    padding: 6px;
+    font-size: 12px;
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
@@ -123,7 +199,7 @@ textarea:focus {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
 }
 
 .input-with-unit {
@@ -132,30 +208,30 @@ textarea:focus {
     background-color: #ffffff;
     border-radius: 6px;
     border: 1px solid #cbd5e1;
-    padding-right: 10px;
+    padding-right: 8px;
     overflow: hidden;
 }
 
 .input-with-unit input {
     border: none !important;
     background: transparent;
-    padding: 8px 10px;
+    padding: 6px 8px;
     color: #1e293b;
     font-size: 14px;
     width: 100%;
 }
 
 .unit {
-    font-size: 13px;
+    font-size: 12px;
     color: #64748b;
     white-space: nowrap;
     font-weight: 500;
 }
 
 .sub-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
-    padding-left: 10px;
+    padding-left: 8px;
     white-space: nowrap;
     font-weight: 500;
 }
@@ -163,7 +239,7 @@ textarea:focus {
 .range-wrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .range-wrapper .input-with-unit {
@@ -171,7 +247,7 @@ textarea:focus {
 }
 
 .range-dash {
-    font-size: 13px;
+    font-size: 12px;
     color: #64748b;
     font-weight: 600;
 }
@@ -181,41 +257,41 @@ textarea:focus {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 8px 10px;
 }
 
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: normal;
     color: #334155;
     margin-bottom: 0;
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     accent-color: #ec4899;
     cursor: pointer;
     margin: 0;
 }
 
-/* Nhóm nút bấm bo tròn viền gradient cực xịn */
+/* Nhóm nút bấm */
 .btn-group {
     display: flex;
-    gap: 10px;
-    margin-top: 24px;
+    gap: 8px;
+    margin-top: 20px;
 }
 
 button {
-    padding: 12px 16px;
+    padding: 10px 14px;
     border: none;
     border-radius: 50px;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     color: white;
     transition: opacity 0.2s, transform 0.1s;
@@ -256,13 +332,13 @@ button:hover {
 }
 
 #log {
-    margin-top: 20px;
-    padding: 12px;
+    margin-top: 16px;
+    padding: 10px;
     background-color: #0f172a;
     border-radius: 8px;
-    height: 140px;
+    height: 120px;
     overflow-y: auto;
-    font-size: 12px;
+    font-size: 11px;
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     color: #38bdf8;
     border: 1px solid #334155;
