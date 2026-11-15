@@ -11,31 +11,59 @@
 <div class="container">
     <h2>Auto Nhắn Tin Discord</h2>
     
-    <label>User Token:</label>
-    <input type="password" id="token" placeholder="Dán token tài khoản vào đây">
-
-    <label>ID Kênh Chat (Channel ID):</label>
-    <input type="text" id="channelId" placeholder="Ví dụ: 123456789012345678">
-
-    <label>Nội dung tin nhắn:</label>
-    <textarea id="message" rows="3" placeholder="Nhập nội dung muốn gửi..."></textarea>
-
-    <label>Chế độ thời gian nghỉ (giây):</label>
-    <div class="time-mode">
-        <label class="radio-label">
-            <input type="radio" name="delayMode" value="fixed" checked onchange="toggleDelayMode()"> Cố định
-        </label>
-        <input type="number" id="fixedDelay" value="90" min="1" placeholder="Số giây cố định">
+    <div class="form-group">
+        <label>User Token:</label>
+        <input type="password" id="token" placeholder="Dán token tài khoản vào đây">
     </div>
 
-    <div class="time-mode">
-        <label class="radio-label">
-            <input type="radio" name="delayMode" value="random" onchange="toggleDelayMode()"> Ngẫu nhiên (Từ - Đến)
-        </label>
-        <div class="range-inputs">
-            <input type="number" id="minDelay" value="60" min="1" placeholder="Từ (giây)" disabled>
-            <span>-</span>
-            <input type="number" id="maxDelay" value="120" min="1" placeholder="Đến (giây)" disabled>
+    <div class="form-group">
+        <label>ID Kênh Chat (Channel ID):</label>
+        <input type="text" id="channelId" placeholder="Ví dụ: 123456789012345678">
+    </div>
+
+    <div class="form-group">
+        <label>Nội dung tin nhắn:</label>
+        <textarea id="message" rows="3" placeholder="Nhập nội dung muốn gửi..."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Chế độ thời gian nghỉ:</label>
+        <div class="mode-tabs">
+            <button type="button" class="tab-btn active" data-mode="fixed" onclick="switchMode('fixed')">Cố định</button>
+            <button type="button" class="tab-btn" data-mode="random" onclick="switchMode('random')">Ngẫu nhiên</button>
+        </div>
+
+        <div id="fixedContainer" class="time-panel">
+            <div class="input-with-unit">
+                <input type="number" id="fixedDelay" value="90" min="1">
+                <span class="unit">giây</span>
+            </div>
+        </div>
+
+        <div id="randomContainer" class="time-panel" style="display: none;">
+            <div class="range-wrapper">
+                <div class="input-with-unit">
+                    <span class="sub-label">Từ</span>
+                    <input type="number" id="minDelay" value="60" min="1">
+                </div>
+                <span class="range-dash">đến</span>
+                <div class="input-with-unit">
+                    <span class="sub-label">Đến</span>
+                    <input type="number" id="maxDelay" value="120" min="1">
+                </div>
+                <span class="unit">giây</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tùy chọn bật/tắt quét Captcha -->
+    <div class="form-group">
+        <label>Tính năng bổ trợ:</label>
+        <div class="checkbox-panel">
+            <label class="checkbox-label">
+                <input type="checkbox" id="captchaMode" onchange="toggleCaptchaNotice()">
+                <span>Tự động quét/giải Captcha (Mô phỏng)</span>
+            </label>
         </div>
     </div>
 
@@ -50,21 +78,37 @@
 <script>
     let timer = null;
     let isRunning = false;
+    let currentMode = 'fixed';
 
-    function toggleDelayMode() {
-        const mode = document.querySelector('input[name="delayMode"]:checked').value;
-        const fixedInput = document.getElementById('fixedDelay');
-        const minInput = document.getElementById('minDelay');
-        const maxInput = document.getElementById('maxDelay');
+    function switchMode(mode) {
+        currentMode = mode;
+        const fixedContainer = document.getElementById('fixedContainer');
+        const randomContainer = document.getElementById('randomContainer');
+        const buttons = document.querySelectorAll('.tab-btn');
+
+        buttons.forEach(btn => {
+            if (btn.getAttribute('data-mode') === mode) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
 
         if (mode === 'fixed') {
-            fixedInput.disabled = false;
-            minInput.disabled = true;
-            maxInput.disabled = true;
+            fixedContainer.style.display = 'block';
+            randomContainer.style.display = 'none';
         } else {
-            fixedInput.disabled = true;
-            minInput.disabled = false;
-            maxInput.disabled = false;
+            fixedContainer.style.display = 'none';
+            randomContainer.style.display = 'block';
+        }
+    }
+
+    function toggleCaptchaNotice() {
+        const isChecked = document.getElementById('captchaMode').checked;
+        if (isChecked) {
+            addLog('🛡️ Đã BẬT tính năng quét Captcha.');
+        } else {
+            addLog('🛡️ Đã TẮT tính năng quét Captcha.');
         }
     }
 
@@ -88,6 +132,14 @@
 
             if (response.ok) {
                 addLog('✅ Gửi tin nhắn thành công!');
+                
+                // Kiểm tra xem trạng thái bật/tắt quét captcha
+                const isCaptchaEnabled = document.getElementById('captchaMode').checked;
+                if (isCaptchaEnabled) {
+                    addLog('🔍 Đang quét phản hồi/tin nhắn mới từ bot game...');
+                    // Chỗ này sau này bạn có thể tích hợp code gọi API quét tin nhắn/ảnh captcha trả về
+                }
+
                 return true;
             } else {
                 const err = await response.json();
@@ -102,8 +154,7 @@
     }
 
     function getNextDelay() {
-        const mode = document.querySelector('input[name="delayMode"]:checked').value;
-        if (mode === 'fixed') {
+        if (currentMode === 'fixed') {
             return parseInt(document.getElementById('fixedDelay').value);
         } else {
             const min = parseInt(document.getElementById('minDelay').value);
@@ -130,14 +181,13 @@
         const token = document.getElementById('token').value.trim();
         const channelId = document.getElementById('channelId').value.trim();
         const message = document.getElementById('message').value.trim();
-        const mode = document.querySelector('input[name="delayMode"]:checked').value;
 
         if (!token || !channelId || !message) {
             alert('Vui lòng điền đầy đủ Token, ID kênh và Nội dung!');
             return;
         }
 
-        if (mode === 'fixed') {
+        if (currentMode === 'fixed') {
             const fixedSec = parseInt(document.getElementById('fixedDelay').value);
             if (isNaN(fixedSec) || fixedSec < 1) {
                 alert('Thời gian cố định phải lớn hơn 0 giây!');
@@ -155,7 +205,9 @@
         isRunning = true;
         document.getElementById('startBtn').disabled = true;
         document.getElementById('stopBtn').disabled = false;
-        addLog('🚀 Bắt đầu chạy...');
+        
+        const isCaptchaEnabled = document.getElementById('captchaMode').checked;
+        addLog(`🚀 Bắt đầu chạy (Quét Captcha: ${isCaptchaEnabled ? 'BẬT' : 'TẮT'})...`);
 
         runLoop(token, channelId, message);
     }
