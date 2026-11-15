@@ -28,7 +28,7 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center; /* Căn giữa hoàn toàn theo chiều dọc và ngang */
+    align-items: center;
     padding: 20px;
 }
 
@@ -55,7 +55,6 @@ h2, h3 {
     color: #fff;
 }
 
-/* Khung thông tin cá nhân / Đăng nhập */
 .profile-box {
     background-color: var(--card-inner);
     padding: 16px;
@@ -64,7 +63,6 @@ h2, h3 {
     border: 1px solid var(--border-subtle);
 }
 
-/* Kho đồ (Inventory Grid) */
 .inventory-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -88,13 +86,11 @@ h2, h3 {
     align-items: center;
 }
 
-/* Màu viền theo độ hiếm vật phẩm */
 .rarity-common { border-color: #949ba4; color: #949ba4; }
 .rarity-rare { border-color: #2383e2; color: #5865f2; }
 .rarity-epic { border-color: #9b59b6; color: #af7ac5; }
 .rarity-legendary { border-color: #f1c40f; color: #f1c40f; font-weight: bold; }
 
-/* Nút bấm chuẩn */
 button, .btn-discord {
     width: 100%;
     padding: 12px;
@@ -123,7 +119,6 @@ button:active, .btn-discord:active { transform: scale(0.98); }
 .btn-discord:hover { background-color: #4752c4; }
 .btn-danger { background-color: var(--red); }
 
-/* Bảng xếp hạng */
 .leaderboard-list {
     list-style: none;
     display: flex;
