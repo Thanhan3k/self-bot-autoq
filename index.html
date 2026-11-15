@@ -3,338 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>linh tinh</title>
+    <title>Focus Arena & Streak Master</title>
+    <!-- Liên kết đến file CSS riêng -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="main-wrapper">
-    <!-- Cột bên trái: Form nhập liệu -->
-    <div class="form-container">
-        <h2>Phát triển: @tuilaanday_</h2>
+<div class="app-container">
+    <!-- CỘT TRÁI: QUẢN LÝ CÁ NHÂN & POMODORO -->
+    <div class="panel left-panel">
+        <h2>✨ Góc Tập Trung & Streak</h2>
         
-        <!-- Khu vực Đăng nhập bằng Token -->
-        <div class="form-group">
-            <label>User Token:</label>
-            <div class="login-input-group">
-                <input type="password" id="token" placeholder="Dán token tài khoản vào đây">
-                <button type="button" id="loginBtn" onclick="loginDiscord()">Đăng nhập</button>
-                <button type="button" id="logoutBtn" onclick="logoutDiscord()" style="display: none;">Đăng xuất</button>
-            </div>
-            
-            <!-- Thẻ hiển thị thông tin tài khoản sau khi đăng nhập -->
-            <div id="user-info" class="user-profile-card" style="display: none;">
-                <img id="userAvatar" src="" alt="Avatar">
-                <div class="user-details">
-                    <div id="userDisplayName" class="display-name"></div>
-                    <div id="userTag" class="user-tag"></div>
-                </div>
+        <div class="user-card">
+            <div class="avatar" id="userAvatar">HL</div>
+            <div>
+                <h3 id="userName" style="margin: 0 0 5px 0;">Huấn Luyện Viên</h3>
+                <span style="font-size: 13px; color: var(--text-muted);">Rank: <strong id="userRank" style="color: #fEE75C;">Tập Sự</strong></span>
             </div>
         </div>
 
-        <!-- Khu vực tính năng bị khóa cho tới khi đăng nhập thành công -->
-        <div id="controlled-features" class="locked-section" style="opacity: 0.4; pointer-events: none;">
-            <div class="form-group">
-                <label>ID Kênh Chat (Channel ID):</label>
-                <input type="text" id="channelId" placeholder="Ví dụ: 123456789012345678">
+        <div class="stats-grid">
+            <div class="stat-box">
+                Chuỗi Streak 🔥
+                <span id="streakCount">5 Ngày</span>
             </div>
-
-            <div class="form-group">
-                <label>Nội dung tin nhắn:</label>
-                <textarea id="message" rows="3" placeholder="Nhập nội dung muốn gửi..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Chế độ thời gian nghỉ:</label>
-                <div class="mode-tabs">
-                    <button type="button" class="tab-btn active" data-mode="fixed" onclick="switchMode('fixed')">Cố định</button>
-                    <button type="button" class="tab-btn" data-mode="random" onclick="switchMode('random')">Ngẫu nhiên</button>
-                </div>
-
-                <div id="fixedContainer" class="time-panel">
-                    <div class="input-with-unit">
-                        <input type="number" id="fixedDelay" value="90" min="1">
-                        <span class="unit">giây</span>
-                    </div>
-                </div>
-
-                <div id="randomContainer" class="time-panel" style="display: none;">
-                    <div class="range-wrapper">
-                        <div class="input-with-unit">
-                            <span class="sub-label">Từ</span>
-                            <input type="number" id="minDelay" value="60" min="1">
-                        </div>
-                        <span class="range-dash">đến</span>
-                        <div class="input-with-unit">
-                            <span class="sub-label">Đến</span>
-                            <input type="number" id="maxDelay" value="120" min="1">
-                        </div>
-                        <span class="unit">giây</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Tính năng Giải Captcha:</label>
-                <div class="checkbox-panel">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="captchaMode" onchange="toggleCaptchaNotice()">
-                        <span>Bật cơ chế tự động giải Captcha (OCR)</span>
-                    </label>
-                </div>
-                
-                <!-- Bảng trạng thái giải Captcha thực tế -->
-                <div id="captchaStatusBox" class="captcha-status-box" style="display: none; margin-top: 8px; padding: 10px; background: #f1f5f9; border-radius: 6px; font-size: 12px; color: #475569; border-left: 3px solid #ec4899;">
-                    🛡️ <b>Tự động giải Captcha:</b> Đang bật. Hệ thống sẽ tự động Giải captcha.
-                </div>
-            </div>
-
-            <div class="btn-group">
-                <button id="startBtn" onclick="startAuto()">Bắt đầu chạy</button>
-                <button id="stopBtn" onclick="stopAuto()" disabled>Dừng lại</button>
+            <div class="stat-box">
+                Tổng Giờ Focus ⏱️
+                <span id="focusMinutes">125 Phút</span>
             </div>
         </div>
 
-        <div id="log">Sẵn sàng... Vui lòng nhập Token để đăng nhập.</div>
+        <button class="btn-success" onclick="dailyCheckin()">📅 Điểm Danh Nhận Streak Hôm Nay</button>
+
+        <!-- Đồng hồ Pomodoro -->
+        <div class="timer-box" style="margin-top: 20px;">
+            <h3>🍅 Phiên Tập Trung (25 Phút)</h3>
+            <div class="timer-display" id="timerDisplay">25:00</div>
+            <button class="btn-primary" id="timerBtn" onclick="toggleTimer()">Bắt Đầu Focus</button>
+        </div>
     </div>
 
-    <!-- Cột bên phải: Thumbnail ảnh -->
-    <div class="thumbnail-container">
-        <img src="https://i.pinimg.com/736x/8f/18/5b/8f185bbf2803e0d0378a6e31b927f659.jpg" alt="Thumbnail Preview">
-        <div class="thumbnail-overlay">
-            <div class="badge">🚀 Tiện ích cá nhân, không mất phí</div>
-            <h3>Tự động treo, giải captcha cho các bot ECO (self-bot, bot)</h3>
-            <p>"Không dùng cho mục đích spam phá các server, sử dụng mục đích đi ngược lại với định nghĩa của nó."</p>
-        </div>
+    <!-- CỘT PHẢI: BẢNG XẾP HẠNG (LEADERBOARD) -->
+    <div class="panel right-panel">
+        <h2>🏆 Bảng Xếp Hạng Server</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">Cập nhật trực tiếp từ file JSON</p>
+        
+        <ul class="leaderboard-list" id="leaderboardList">
+            <!-- Dữ liệu mẫu đổ từ JS -->
+        </ul>
     </div>
 </div>
 
 <script>
-    let timer = null;
-    let isRunning = false;
-    let currentMode = 'fixed';
-    let isLoggedIn = false;
+    // Dữ liệu giả lập mô phỏng file JSON
+    let dbData = {
+        currentUser: {
+            name: "Huấn Luyện Viên",
+            streak: 5,
+            minutes: 125,
+            rank: "Học Bá"
+        },
+        rankings: [
+            { name: "Alex (Top 1)", minutes: 1240, streak: 30, rank: "Thần Đồng" },
+            { name: "Luna Ngơ Ngác", minutes: 980, streak: 21, rank: "Giáo Sư" },
+            { name: "Huấn Luyện Viên", minutes: 125, streak: 5, rank: "Học Bá" },
+            { name: "Kuro Neko", minutes: 90, streak: 2, rank: "Tập Sự" }
+        ]
+    };
 
-    async function loginDiscord() {
-        const tokenInput = document.getElementById('token');
-        const token = tokenInput.value.trim();
+    // Load dữ liệu lên giao diện
+    function renderApp() {
+        document.getElementById('userName').innerText = dbData.currentUser.name;
+        document.getElementById('streakCount').innerText = `${dbData.currentUser.streak} Ngày`;
+        document.getElementById('focusMinutes').innerText = `${dbData.currentUser.minutes} Phút`;
+        document.getElementById('userRank').innerText = dbData.currentUser.rank;
+
+        // Render Leaderboard
+        const listEl = document.getElementById('leaderboardList');
+        listEl.innerHTML = '';
         
-        if (!token) {
-            alert('Vui lòng nhập User Token!');
-            return;
-        }
+        dbData.rankings.sort((a, b) => b.minutes - a.minutes);
 
-        const loginBtn = document.getElementById('loginBtn');
-        loginBtn.disabled = true;
-        loginBtn.innerText = 'Đang kiểm tra...';
-        addLog('🔄 Đang xác thực Token với Discord API...');
+        dbData.rankings.forEach((user, index) => {
+            let medal = `<span>#${index + 1}</span>`;
+            if (index === 0) medal = '🥇';
+            if (index === 1) medal = '🥈';
+            if (index === 2) medal = '🥉';
 
-        try {
-            const response = await fetch('https://discord.com/api/v9/users/@me', {
-                method: 'GET',
-                headers: {
-                    'Authorization': token
-                }
-            });
-
-            if (response.ok) {
-                const user = await response.json();
-                isLoggedIn = true;
-
-                const avatarUrl = user.avatar 
-                    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-                    : `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % 6n}.png`;
-
-                document.getElementById('userAvatar').src = avatarUrl;
-                document.getElementById('userDisplayName').innerText = user.global_name || user.username;
-                document.getElementById('userTag').innerText = `@${user.username} • ID: ${user.id}`;
-                document.getElementById('user-info').style.display = 'flex';
-
-                const features = document.getElementById('controlled-features');
-                features.classList.remove('locked-section');
-                features.style.opacity = '1';
-                features.style.pointerEvents = 'auto';
-
-                tokenInput.disabled = true;
-                loginBtn.style.display = 'none';
-                document.getElementById('logoutBtn').style.display = 'inline-block';
-
-                addLog(`✅ Đăng nhập thành công: ${user.global_name || user.username} (@${user.username})`);
-            } else {
-                addLog(`❌ Đăng nhập thất bại (${response.status}): Token không hợp lệ hoặc đã hết hạn.`);
-                alert('Token không hợp lệ!');
-            }
-        } catch (error) {
-            addLog(`⚠️ Lỗi mạng hoặc CORS: ${error.message}`);
-        } finally {
-            loginBtn.disabled = false;
-            loginBtn.innerText = 'Đăng nhập';
-        }
-    }
-
-    function logoutDiscord() {
-        stopAuto(); 
-        isLoggedIn = false;
-
-        document.getElementById('user-info').style.display = 'none';
-        document.getElementById('userAvatar').src = '';
-        
-        const tokenInput = document.getElementById('token');
-        tokenInput.value = '';
-        tokenInput.disabled = false;
-
-        document.getElementById('loginBtn').style.display = 'inline-block';
-        document.getElementById('logoutBtn').style.display = 'none';
-
-        const features = document.getElementById('controlled-features');
-        features.classList.add('locked-section');
-        features.style.opacity = '0.4';
-        features.style.pointerEvents = 'none';
-
-        addLog('🔒 Đã đăng xuất. Vui lòng nhập Token mới để tiếp tục.');
-    }
-
-    function switchMode(mode) {
-        currentMode = mode;
-        const fixedContainer = document.getElementById('fixedContainer');
-        const randomContainer = document.getElementById('randomContainer');
-        const buttons = document.querySelectorAll('.tab-btn');
-
-        buttons.forEach(btn => {
-            if (btn.getAttribute('data-mode') === mode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            const li = document.createElement('li');
+            li.className = 'leaderboard-item';
+            li.innerHTML = `
+                <div>
+                    <strong class="rank-badge">${medal} ${user.name}</strong>
+                    <div style="font-size: 11px; color: var(--text-muted);">🔥 Streak: ${user.streak} ngày | Rank: ${user.rank}</div>
+                </div>
+                <div style="font-weight: bold; color: var(--accent);">${user.minutes} phút</div>
+            `;
+            listEl.appendChild(li);
         });
-
-        if (mode === 'fixed') {
-            fixedContainer.style.display = 'block';
-            randomContainer.style.display = 'none';
-        } else {
-            fixedContainer.style.display = 'none';
-            randomContainer.style.display = 'block';
-        }
     }
 
-    function toggleCaptchaNotice() {
-        const isChecked = document.getElementById('captchaMode').checked;
-        const statusBox = document.getElementById('captchaStatusBox');
-        if (isChecked) {
-            statusBox.style.display = 'block';
-            addLog('🛡️ Đã BẬT cơ chế tự động giải Captcha.');
-        } else {
-            statusBox.style.display = 'none';
-            addLog('🛡️ Đã TẮT cơ chế tự động giải Captcha.');
-        }
+    // Tính năng Điểm danh
+    function dailyCheckin() {
+        dbData.currentUser.streak += 1;
+        alert('🎉 Điểm danh thành công! Chuỗi Streak của bạn đã tăng lên.');
+        renderApp();
     }
 
-    function addLog(text) {
-        const logDiv = document.getElementById('log');
-        const time = new Date().toLocaleTimeString();
-        logDiv.innerHTML += `<div>[${time}] ${text}</div>`;
-        logDiv.scrollTop = logDiv.scrollHeight;
-    }
+    // Logic Đồng hồ Pomodoro
+    let timerInterval = null;
+    let timeLeft = 25 * 60;
+    let isRunning = false;
 
-    async function sendMessage(token, channelId, content) {
-        try {
-            const response = await fetch(`https://discord.com/api/v9/channels/${channelId}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content: content })
-            });
+    function toggleTimer() {
+        const btn = document.getElementById('timerBtn');
+        if (!isRunning) {
+            isRunning = true;
+            btn.innerText = "Tạm Dừng";
+            btn.className = "btn-danger";
 
-            if (response.ok) {
-                addLog('✅ Gửi tin nhắn thành công!');
-                const isCaptchaEnabled = document.getElementById('captchaMode').checked;
-                if (isCaptchaEnabled) {
-                    addLog('🔍 Đang kiểm tra Captcha');
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    alert('🎯 Hoàn thành phiên Pomodoro! Bạn được cộng +25 phút vào hồ sơ.');
+                    dbData.currentUser.minutes += 25;
+                    resetTimer();
+                    renderApp();
                 }
-                return true;
-            } else {
-                const err = await response.json();
-                addLog(`❌ Lỗi (${response.status}): ${err.message || 'Kiểm tra lại Token/ID'}`);
-                stopAuto();
-                return false;
-            }
-        } catch (error) {
-            addLog(`⚠️ Lỗi mạng hoặc bị chặn CORS: ${error.message}`);
-            return true;
-        }
-    }
-
-    function getNextDelay() {
-        if (currentMode === 'fixed') {
-            return parseInt(document.getElementById('fixedDelay').value);
+            }, 1000);
         } else {
-            const min = parseInt(document.getElementById('minDelay').value);
-            const max = parseInt(document.getElementById('maxDelay').value);
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+            clearInterval(timerInterval);
+            isRunning = false;
+            btn.innerText = "Tiếp Tục Focus";
+            btn.className = "btn-primary";
         }
     }
 
-    async function runLoop(token, channelId, message) {
-        if (!isRunning) return;
-        const success = await sendMessage(token, channelId, message);
-        if (!success || !isRunning) return;
-        const nextDelaySec = getNextDelay();
-        addLog(`⏳ Chờ ${nextDelaySec} giây cho tin tiếp theo...`);
-        timer = setTimeout(() => {
-            runLoop(token, channelId, message);
-        }, nextDelaySec * 1000);
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    function startAuto() {
-        if (!isLoggedIn) {
-            alert('Vui lòng đăng nhập bằng Token trước!');
-            return;
-        }
-
-        const token = document.getElementById('token').value.trim();
-        const channelId = document.getElementById('channelId').value.trim();
-        const message = document.getElementById('message').value.trim();
-
-        if (!token || !channelId || !message) {
-            alert('Vui lòng điền đầy đủ Token, ID kênh và Nội dung!');
-            return;
-        }
-
-        if (currentMode === 'fixed') {
-            const fixedSec = parseInt(document.getElementById('fixedDelay').value);
-            if (isNaN(fixedSec) || fixedSec < 1) {
-                alert('Thời gian cố định phải lớn hơn 0 giây!');
-                return;
-            }
-        } else {
-            const minSec = parseInt(document.getElementById('minDelay').value);
-            const maxSec = parseInt(document.getElementById('maxDelay').value);
-            if (isNaN(minSec) || isNaN(maxSec) || minSec < 1 || maxSec < minSec) {
-                alert('Khoảng thời gian không hợp lệ!');
-                return;
-            }
-        }
-
-        isRunning = true;
-        document.getElementById('startBtn').disabled = true;
-        document.getElementById('stopBtn').disabled = false;
-        const isCaptchaEnabled = document.getElementById('captchaMode').checked;
-        addLog(`🚀 Bắt đầu chạy (Tự động giải Captcha: ${isCaptchaEnabled ? 'BẬT' : 'TẮT'})...`);
-        runLoop(token, channelId, message);
-    }
-
-    function stopAuto() {
+    function resetTimer() {
+        clearInterval(timerInterval);
         isRunning = false;
-        if (timer) {
-            clearTimeout(timer);
-            timer = null;
-        }
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('stopBtn').disabled = true;
-        addLog('🛑 Đã dừng.');
+        timeLeft = 25 * 60;
+        document.getElementById('timerBtn').innerText = "Bắt Đầu Focus";
+        document.getElementById('timerBtn').className = "btn-primary";
+        updateTimerDisplay();
     }
+
+    renderApp();
 </script>
 
 </body>
